@@ -1,0 +1,17 @@
+{
+    "_hash": "a2fce87e9c3b914e73825119ce00d23816d02b51710ab08cafec2d554727bbbd",
+    "patches": {
+        "voku/portable-ascii": [
+            {
+                "package": "voku/portable-ascii",
+                "description": "PHP 8.4以降でのnullable引数の非推奨警告を解消する",
+                "url": "patches/portable-ascii-php-84-nullable.patch",
+                "sha256": "620737e5b7fcc5ad9c954978e5360270c78ad149cf9949566023b2187db24340",
+                "depth": 1,
+                "extra": {
+                    "provenance": "root"
+                }
+            }
+        ]
+    }
+}
