@@ -11,6 +11,18 @@ class InspectionWorkflowTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_daily_inspection_page_uses_the_requested_title_without_summary_cards(): void
+    {
+        $this->get(route('inspections.create'))
+            ->assertOk()
+            ->assertSee('<h1>日常点検</h1>', false)
+            ->assertSee('<span class="brand-name">設備点検</span><span class="brand-caption">Fieldnote</span>', false)
+            ->assertDontSee('<i class="online-dot">', false)
+            ->assertDontSee('設備点検チェックリスト')
+            ->assertDontSee('圧力単位')
+            ->assertDontSee('summary-grid');
+    }
+
     public function test_pressure_readings_are_saved_and_shown_as_numeric_values(): void
     {
         $response = $this->post(route('inspections.store'), [
