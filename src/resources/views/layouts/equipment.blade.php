@@ -16,11 +16,6 @@
         <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5 9.2 17 19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 3.5 19.5 6v5.7c0 4.1-3.1 7.7-7.5 9.3-4.4-1.6-7.5-5.2-7.5-9.3V6L12 3.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
         <span class="brand-name">設備点検</span><span class="brand-caption">Fieldnote</span>
     </a>
-    <nav class="topbar-right" aria-label="メインメニュー">
-        <a class="nav-link" href="{{ route('home') }}">ホーム</a>
-        <a class="nav-link" href="{{ route('inspections.create') }}">日常点検</a>
-        <a class="nav-link" href="{{ route('inspections.index') }}">点検履歴</a>
-    </nav>
 </header>
 {{-- 点検入力、履歴、記録詳細の各画面をここに表示する。 --}}
 <main>
