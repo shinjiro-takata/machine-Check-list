@@ -148,6 +148,51 @@ h1 {
     background: white;
     box-shadow: 0 1px 3px #162d3714;
 }
+/* ホーム画面の点検種別カード */
+.type-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+    gap: 16px;
+}
+.type-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 22px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: 0 2px 5px #1b333608;
+    transition: border-color .15s, transform .15s;
+}
+.type-card:hover {
+    border-color: var(--green);
+    transform: translateY(-2px);
+}
+.type-card-name {
+    font-size: 18px;
+    font-weight: 750;
+}
+.type-card-description {
+    flex: 1;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.6;
+}
+.type-card-status {
+    margin-top: 6px;
+    color: var(--green);
+    font-size: 12px;
+    font-weight: 700;
+}
+.type-card-status.is-pending {
+    color: var(--amber);
+}
+.empty-state {
+    padding: 48px 22px;
+    color: var(--muted);
+    text-align: center;
+}
 /* サマリーカードとパネル */
 .summary-grid {
     display: grid;

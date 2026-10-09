@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InspectionController;
 
 /*
@@ -13,8 +14,16 @@ use App\Http\Controllers\InspectionController;
 |
 */
 
-// 点検入力画面と新しい点検記録の登録。
-Route::get('/', [InspectionController::class, 'create'])->name('inspections.create');
+// 各点検へ移動するためのホーム画面。
+Route::get('/', [HomeController::class, 'index'])->name('home');
+
+// 項目が未登録の点検は準備中画面を表示する。
+Route::get('/weekly', [HomeController::class, 'comingSoon'])->defaults('type', 'weekly')->name('inspections.weekly');
+Route::get('/monthly', [HomeController::class, 'comingSoon'])->defaults('type', 'monthly')->name('inspections.monthly');
+Route::get('/periodic', [HomeController::class, 'comingSoon'])->defaults('type', 'periodic')->name('inspections.periodic');
+
+// 日常点検の入力画面と新しい点検記録の登録。
+Route::get('/daily', [InspectionController::class, 'create'])->name('inspections.create');
 Route::post('/inspections', [InspectionController::class, 'store'])->name('inspections.store');
 
 // 閲覧専用の点検履歴、CSV出力、記録詳細。

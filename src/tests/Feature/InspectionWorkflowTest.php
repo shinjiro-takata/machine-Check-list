@@ -11,6 +11,21 @@ class InspectionWorkflowTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_home_links_to_every_inspection_type(): void
+    {
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSeeInOrder(['日常点検', '週次点検', '月次点検', '定期点検'])
+            ->assertSee(route('inspections.create'), false)
+            ->assertSee(route('inspections.weekly'), false)
+            ->assertSee(route('inspections.monthly'), false)
+            ->assertSee(route('inspections.periodic'), false);
+
+        foreach (['weekly' => '週次点検', 'monthly' => '月次点検', 'periodic' => '定期点検'] as $path => $name) {
+            $this->get('/' . $path)->assertOk()->assertSee($name)->assertSee('準備中');
+        }
+    }
+
     public function test_daily_inspection_page_uses_the_requested_title_without_summary_cards(): void
     {
         $this->get(route('inspections.create'))
