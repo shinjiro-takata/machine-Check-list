@@ -3,22 +3,24 @@
 namespace App\Services;
 
 use App\Models\InspectionRecord;
-use App\Support\EquipmentChecklist;
+use App\Support\InspectionTypes;
 use Illuminate\Support\Facades\DB;
 
 class InspectionRecordService
 {
     /**
      * @param array{
+     *     inspection_type?: string,
      *     inspection_date: string,
      *     inspector: string,
      *     note?: string|null,
-     *     results: array<string, array{status: 'ok'|'ng'}|array{pressure: numeric-string}>
+     *     results: array<string, mixed>
      * } $data
      */
     public function create(array $data): InspectionRecord
     {
         return InspectionRecord::create([
+            'inspection_type' => $data['inspection_type'] ?? 'daily',
             'inspection_date' => $data['inspection_date'],
             'inspector' => $data['inspector'],
             'note' => $data['note'] ?? null,
@@ -68,7 +70,7 @@ class InspectionRecordService
      * @param array{
      *     inspector: string,
      *     note: string|null,
-     *     results: array<string, array{status: 'ok'|'ng'}|array{pressure: numeric-string}>
+     *     results: array<string, mixed>
      * } $newValues
      * @return array<string, mixed>
      */
@@ -81,7 +83,7 @@ class InspectionRecordService
             if ($field === 'results') {
                 $oldValue = $oldValue ?: [];
                 if ($oldValue != $newValue) {
-                    $changes[$field] = $this->resultChanges($oldValue, $newValue);
+                    $changes[$field] = $this->resultChanges($record, $oldValue, $newValue);
                 }
             } elseif ($oldValue !== $newValue) {
                 $changes[$field] = ['変更前' => $oldValue, '変更後' => $newValue];
@@ -94,20 +96,23 @@ class InspectionRecordService
     /**
      * 点検項目ごとの旧値と新値を、人が読める編集履歴に変換する。
      *
-     * @param array<string, array{status: 'ok'|'ng'}|array{pressure: numeric-string}> $oldResults
-     * @param array<string, array{status: 'ok'|'ng'}|array{pressure: numeric-string}> $newResults
+     * @param array<string, mixed> $oldResults
+     * @param array<string, mixed> $newResults
      * @return array<string, array{変更前: string, 変更後: string}>
      */
-    private function resultChanges(array $oldResults, array $newResults): array
+    private function resultChanges(InspectionRecord $record, array $oldResults, array $newResults): array
     {
+        $items = InspectionTypes::itemsFor($record->inspection_type);
+
         $changes = [];
-        foreach (EquipmentChecklist::items() as $id => $item) {
+        foreach ($items as $id => $item) {
             $oldValue = $oldResults[$id] ?? null;
             $newValue = $newResults[$id] ?? null;
             if ($oldValue != $newValue) {
+                $unit = $item['unit'] ?? (($item['type'] ?? null) === 'pressure' ? 'MPa' : '');
                 $changes[$item['group'] . ' / ' . $item['location'] . ' / ' . $item['item']] = [
-                    '変更前' => $this->describeResult($oldValue),
-                    '変更後' => $this->describeResult($newValue),
+                    '変更前' => $this->describeResult($oldValue, $unit),
+                    '変更後' => $this->describeResult($newValue, $unit),
                 ];
             }
         }
@@ -118,9 +123,9 @@ class InspectionRecordService
     /**
      * 点検結果を、編集履歴に表示するための文字列に整える。
      *
-     * @param array{status: 'ok'|'ng'}|array{pressure: numeric-string}|null $result
+     * @param array<string, mixed>|null $result
      */
-    private function describeResult(?array $result): string
+    private function describeResult(?array $result, string $unit = ''): string
     {
         if (!$result) {
             return '未入力';
@@ -128,6 +133,10 @@ class InspectionRecordService
 
         if (isset($result['pressure'])) {
             return $result['pressure'] . ' MPa';
+        }
+
+        if (isset($result['value'])) {
+            return $result['value'] . ($unit ? ' ' . $unit : '');
         }
 
         return ($result['status'] ?? null) === 'ok' ? '良好' : '要対応';

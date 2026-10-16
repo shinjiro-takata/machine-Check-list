@@ -49,7 +49,7 @@ class InspectionRecordRequest extends FormRequest
             $rules['inspection_date'] = [
                 'required',
                 'date_format:Y-m-d',
-                Rule::unique('inspection_records', 'inspection_date'),
+                Rule::unique('inspection_records', 'inspection_date')->where('inspection_type', 'daily'),
             ];
         } else {
             $rules['editor_name'] = ['required', 'string', 'max:80'];

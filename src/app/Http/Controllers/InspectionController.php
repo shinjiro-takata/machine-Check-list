@@ -45,7 +45,7 @@ class InspectionController extends Controller
     public function history(): View
     {
         return view('inspections.index', [
-            'records' => InspectionRecord::orderByDesc('inspection_date')->paginate(30),
+            'records' => InspectionRecord::ofType('daily')->orderByDesc('inspection_date')->paginate(30),
             'itemCount' => count(EquipmentChecklist::items()),
         ]);
     }

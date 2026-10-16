@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InspectionController;
+use App\Http\Controllers\ScheduledInspectionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,9 +19,18 @@ use App\Http\Controllers\InspectionController;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // 項目が未登録の点検は準備中画面を表示する。
-Route::get('/weekly', [HomeController::class, 'comingSoon'])->defaults('type', 'weekly')->name('inspections.weekly');
-Route::get('/monthly', [HomeController::class, 'comingSoon'])->defaults('type', 'monthly')->name('inspections.monthly');
 Route::get('/periodic', [HomeController::class, 'comingSoon'])->defaults('type', 'periodic')->name('inspections.periodic');
+
+// 週次・月次点検の入力、保存、履歴、CSV出力、詳細、編集。点検種別はtypeで切り替える。
+foreach (['weekly', 'monthly'] as $type) {
+    Route::get("/{$type}", [ScheduledInspectionController::class, 'create'])->defaults('type', $type)->name("inspections.{$type}.create");
+    Route::post("/{$type}/inspections", [ScheduledInspectionController::class, 'store'])->defaults('type', $type)->name("inspections.{$type}.store");
+    Route::get("/{$type}/inspections", [ScheduledInspectionController::class, 'index'])->defaults('type', $type)->name("inspections.{$type}.index");
+    Route::get("/{$type}/inspections/export", [ScheduledInspectionController::class, 'export'])->defaults('type', $type)->name("inspections.{$type}.export");
+    Route::get("/{$type}/inspections/{inspection}", [ScheduledInspectionController::class, 'show'])->defaults('type', $type)->name("inspections.{$type}.show");
+    Route::get("/{$type}/inspections/{inspection}/edit", [ScheduledInspectionController::class, 'edit'])->defaults('type', $type)->name("inspections.{$type}.edit");
+    Route::put("/{$type}/inspections/{inspection}", [ScheduledInspectionController::class, 'update'])->defaults('type', $type)->name("inspections.{$type}.update");
+}
 
 // 日常点検の入力画面と新しい点検記録の登録。
 Route::get('/daily', [InspectionController::class, 'create'])->name('inspections.create');

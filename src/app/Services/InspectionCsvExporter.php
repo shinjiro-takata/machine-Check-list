@@ -13,7 +13,7 @@ class InspectionCsvExporter
      */
     public function download(): StreamedResponse
     {
-        $records = InspectionRecord::orderBy('inspection_date')->get();
+        $records = InspectionRecord::ofType('daily')->orderBy('inspection_date')->get();
         $items = EquipmentChecklist::items();
 
         return response()->streamDownload(function () use ($records, $items): void {
