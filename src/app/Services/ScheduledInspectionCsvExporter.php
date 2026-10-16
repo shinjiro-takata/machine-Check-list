@@ -15,27 +15,17 @@ class ScheduledInspectionCsvExporter
     {
         $records = InspectionRecord::ofType($type)->orderBy('inspection_date')->get();
         $items = InspectionTypes::itemsFor($type);
+        // 油の補充・交換項目では、点検項目名と結果の列は不要。
+        $hasOil = collect($items)->contains(fn(array $item): bool => ($item['type'] ?? null) === 'oil');
 
-        return response()->streamDownload(function () use ($records, $items): void {
+        return response()->streamDownload(function () use ($records, $items, $hasOil): void {
             $output = fopen('php://output', 'w');
             if ($output === false) {
                 throw new \RuntimeException('CSV出力先を開けませんでした。');
             }
 
             fwrite($output, "\xEF\xBB\xBF");
-            fputcsv($output, [
-                '点検日',
-                '点検担当者',
-                '点検名称',
-                '点検箇所',
-                '点検項目',
-                '方法',
-                '結果',
-                '測定値',
-                '単位',
-                '全体メモ',
-                '最終編集者',
-            ]);
+            fputcsv($output, $this->headers($hasOil));
 
             foreach ($records as $record) {
                 foreach ($items as $id => $item) {
@@ -43,14 +33,16 @@ class ScheduledInspectionCsvExporter
                     $status = ($result['status'] ?? null) === 'ok'
                         ? '良好'
                         : (($result['status'] ?? null) === 'ng' ? '要対応' : (isset($result['value']) ? '数値記録' : '未点検'));
+                    $action = \App\Support\PeriodicChecklist::actionLabels()[$result['action'] ?? ''] ?? '';
                     $row = [
                         $record->inspection_date->format('Y-m-d'),
                         $record->inspector,
                         $item['group'],
                         $item['location'],
-                        $item['item'],
+                        ...($hasOil ? [] : [$item['item']]),
                         $item['method'],
-                        $status,
+                        ...($hasOil ? [] : [$status]),
+                        $action,
                         $result['value'] ?? '',
                         isset($result['value']) ? ($item['unit'] ?? '') : '',
                         $record->note ?? '',
@@ -68,6 +60,29 @@ class ScheduledInspectionCsvExporter
         }, $type . '-inspections-' . now()->format('Ymd') . '.csv', [
             'Content-Type' => 'text/csv; charset=UTF-8',
         ]);
+    }
+
+    /**
+     * CSVの見出し行を返す。油の補充・交換項目では点検項目名と結果の列を省く。
+     *
+     * @return list<string>
+     */
+    private function headers(bool $hasOil): array
+    {
+        return [
+            '点検日',
+            '点検担当者',
+            '点検名称',
+            '点検箇所',
+            ...($hasOil ? [] : ['点検項目']),
+            '方法',
+            ...($hasOil ? [] : ['結果']),
+            '作業',
+            '測定値',
+            '単位',
+            '全体メモ',
+            '最終編集者',
+        ];
     }
 
     /**

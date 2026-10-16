@@ -51,14 +51,17 @@
                 </div>
             @endif
             @php $result = $record->results[$id] ?? []; @endphp
-            <div class="check-row">
+            <div class="check-row {{ ($item['type'] ?? null) === 'oil' ? 'check-row-oil' : '' }}">
                 <span class="row-number">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
                 <div class="location-cell"><span class="cell-label">点検箇所</span><span class="cell-main">{{ $item['location'] }}</span></div>
-                <div class="item-cell"><span class="cell-label">点検項目</span><span class="cell-main">{{ $item['item'] }}</span></div>
+                @if (($item['type'] ?? null) !== 'oil')<div class="item-cell"><span class="cell-label">点検項目</span><span class="cell-main">{{ $item['item'] }}</span></div>@endif
                 <span class="method method-cell">{{ $item['method'] }}</span>
-                @if (($item['type'] ?? null) === 'numeric')
+                @if (in_array($item['type'] ?? null, ['numeric', 'oil'], true))
                     <div class="result-controls">
                         @if (isset($result['value']) && $result['value'] !== '')
+                            @if (!empty($result['action']))
+                                <span class="badge">{{ \App\Support\PeriodicChecklist::actionLabels()[$result['action']] ?? $result['action'] }}</span>
+                            @endif
                             <span class="pressure-value">{{ $result['value'] }}</span>
                             @if (!empty($item['unit']))
                                 <span class="pressure-unit">{{ $item['unit'] }}</span>

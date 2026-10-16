@@ -45,8 +45,11 @@ class InspectionTypes
                 'key' => 'periodic',
                 'name' => '定期点検',
                 'description' => '6月、12月の決算時に行う設備点検を記録します',
-                'route' => 'inspections.periodic',
-                'available' => false,
+                'route' => 'inspections.periodic.create',
+                'subtitle' => '原料場　油の補充・交換（6月分・12月分）',
+                'footnote' => "6月：交換、12月：補充\n※オイルポット（のぞき窓）はオイルの確認ができない場合は交換　※担当者は欄に補充量記入の事　※担当責任者は記録確認の事",
+                'checklist' => PeriodicChecklist::class,
+                'available' => true,
             ],
         ];
     }

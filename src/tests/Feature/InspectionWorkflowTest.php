@@ -19,11 +19,11 @@ class InspectionWorkflowTest extends TestCase
             ->assertSee(route('inspections.create'), false)
             ->assertSee(route('inspections.weekly.create'), false)
             ->assertSee(route('inspections.monthly.create'), false)
-            ->assertSee(route('inspections.periodic'), false);
+            ->assertSee(route('inspections.periodic.create'), false);
 
         $this->get(route('inspections.weekly.create'))->assertOk()->assertSee('週次点検');
         $this->get(route('inspections.monthly.create'))->assertOk()->assertSee('月次点検');
-        $this->get('/periodic')->assertOk()->assertSee('定期点検')->assertSee('準備中');
+        $this->get(route('inspections.periodic.create'))->assertOk()->assertSee('定期点検');
     }
 
     public function test_daily_inspection_page_uses_the_requested_title_without_summary_cards(): void

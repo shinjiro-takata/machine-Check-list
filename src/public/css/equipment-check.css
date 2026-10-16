@@ -346,7 +346,7 @@ h1 {
 }
 .check-row {
     display: grid;
-    grid-template-columns: 42px minmax(160px,1fr) minmax(160px,1.05fr) 86px 210px;
+    grid-template-columns: 42px minmax(160px,1fr) minmax(120px,1fr) minmax(86px,190px) 210px;
     align-items: center;
     gap: 13px;
     min-height: 68px;
@@ -377,7 +377,14 @@ h1 {
     background: #f3f5f4;
     color: #66747a;
     font-size: 11px;
-    white-space: nowrap;
+    line-height: 1.4;
+    text-align: center;
+    overflow-wrap: anywhere;
+}
+.oil-editor {
+    display: grid;
+    gap: 8px;
+    justify-items: end;
 }
 .result-controls {
     display: flex;
@@ -417,6 +424,24 @@ h1 {
     color: var(--red);
     background: var(--red-soft);
     border-color: #efc5bd;
+}
+/* 点検項目名の列がない油の補充・交換行は、油種と入力欄を広げる。 */
+.check-row-oil {
+    grid-template-columns: 42px minmax(150px,1fr) minmax(200px,1.3fr) minmax(250px,1.2fr);
+}
+.oil-editor .pressure-field {
+    width: 100%;
+}
+/* 補充・交換の選択状態を色で区別する。 */
+.result-radio[value=refill]:checked+.result-choice {
+    color: var(--green);
+    background: var(--green-soft);
+    border-color: #b8ddcb;
+}
+.result-radio[value=replace]:checked+.result-choice {
+    color: #8a5a00;
+    background: #fff4d9;
+    border-color: #ecd08f;
 }
 .pressure-input {
     width: 100%;
@@ -694,6 +719,40 @@ h1 {
         grid-row: 1/span 2;
         align-self: start;
         padding-top: 4px;
+    }
+    /* 油の補充・交換行は、機器名、油種、作業選択、量の順に縦に並べる。 */
+    .check-row-oil {
+        grid-template-columns: 24px minmax(0,1fr);
+    }
+    .check-row-oil .location-cell {
+        grid-column: 2;
+        grid-row: 1;
+    }
+    .check-row-oil .method-cell {
+        grid-column: 2;
+        grid-row: 2;
+        justify-self: stretch;
+        margin-top: -2px;
+    }
+    .check-row-oil .result-controls,.check-row-oil .oil-editor {
+        grid-column: 2;
+        grid-row: 3;
+        justify-items: stretch;
+        margin-top: 4px;
+    }
+    .check-row-oil .oil-editor .result-controls {
+        grid-column: auto;
+        grid-row: auto;
+        margin-top: 0;
+    }
+    .check-row-oil .oil-editor .result-choice {
+        max-width: none;
+    }
+    .check-row-oil .pressure-field {
+        width: 100%;
+    }
+    .check-row-oil .row-number {
+        grid-row: 1/span 2;
     }
     .cell-label {
         display: block;

@@ -42,12 +42,19 @@ class ScheduledInspectionRecordRequest extends FormRequest
         ];
 
         foreach ($items as $id => $item) {
-            $isNumeric = ($item['type'] ?? null) === 'numeric';
-            $rules['results.' . $id] = ['nullable', 'array:' . ($isNumeric ? 'value' : 'status')];
+            $itemType = $item['type'] ?? null;
 
-            if ($isNumeric) {
+            if ($itemType === 'oil') {
+                $rules['results.' . $id] = ['nullable', 'array:action,value'];
+                $rules['results.' . $id . '.value'] = ['nullable', 'numeric'];
+                $rules['results.' . $id . '.action'] = count($item['actions']) > 1
+                    ? ['nullable', 'required_with:results.' . $id . '.value', Rule::in($item['actions'])]
+                    : ['nullable', Rule::in($item['actions'])];
+            } elseif ($itemType === 'numeric') {
+                $rules['results.' . $id] = ['nullable', 'array:value'];
                 $rules['results.' . $id . '.value'] = ['nullable', 'numeric'];
             } else {
+                $rules['results.' . $id] = ['nullable', 'array:status'];
                 $rules['results.' . $id . '.status'] = ['nullable', Rule::in(['ok', 'ng'])];
             }
         }
@@ -75,6 +82,7 @@ class ScheduledInspectionRecordRequest extends FormRequest
         $name = InspectionTypes::find($this->inspectionType())['name'];
 
         return [
+            'results.*.action.required_with' => '数値を入力した項目は、補充か交換かを選択してください。',
             'inspection_date.unique' => "この日付の{$name}記録は登録済みです。履歴から記録を確認し、必要に応じて編集してください。",
         ];
     }

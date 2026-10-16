@@ -110,7 +110,11 @@ class InspectionRecordService
             $newValue = $newResults[$id] ?? null;
             if ($oldValue != $newValue) {
                 $unit = $item['unit'] ?? (($item['type'] ?? null) === 'pressure' ? 'MPa' : '');
-                $changes[$item['group'] . ' / ' . $item['location'] . ' / ' . $item['item']] = [
+                $label = $item['group'] . ' / ' . $item['location'];
+                if (($item['type'] ?? null) !== 'oil') {
+                    $label .= ' / ' . $item['item'];
+                }
+                $changes[$label] = [
                     '変更前' => $this->describeResult($oldValue, $unit),
                     '変更後' => $this->describeResult($newValue, $unit),
                 ];
@@ -136,7 +140,9 @@ class InspectionRecordService
         }
 
         if (isset($result['value'])) {
-            return $result['value'] . ($unit ? ' ' . $unit : '');
+            $action = \App\Support\PeriodicChecklist::actionLabels()[$result['action'] ?? ''] ?? null;
+
+            return ($action ? $action . ' ' : '') . $result['value'] . ($unit ? ' ' . $unit : '');
         }
 
         return ($result['status'] ?? null) === 'ok' ? '良好' : '要対応';

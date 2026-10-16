@@ -18,11 +18,8 @@ use App\Http\Controllers\ScheduledInspectionController;
 // 各点検へ移動するためのホーム画面。
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-// 項目が未登録の点検は準備中画面を表示する。
-Route::get('/periodic', [HomeController::class, 'comingSoon'])->defaults('type', 'periodic')->name('inspections.periodic');
-
-// 週次・月次点検の入力、保存、履歴、CSV出力、詳細、編集。点検種別はtypeで切り替える。
-foreach (['weekly', 'monthly'] as $type) {
+// 週次・月次・定期点検の入力、保存、履歴、CSV出力、詳細、編集。点検種別はtypeで切り替える。
+foreach (['weekly', 'monthly', 'periodic'] as $type) {
     Route::get("/{$type}", [ScheduledInspectionController::class, 'create'])->defaults('type', $type)->name("inspections.{$type}.create");
     Route::post("/{$type}/inspections", [ScheduledInspectionController::class, 'store'])->defaults('type', $type)->name("inspections.{$type}.store");
     Route::get("/{$type}/inspections", [ScheduledInspectionController::class, 'index'])->defaults('type', $type)->name("inspections.{$type}.index");

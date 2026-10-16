@@ -83,12 +83,28 @@
                             foreach (array_slice($groups, 0, $groupIndex) as $previousGroup) $number += count($previousGroup['items']);
                             $number += $itemIndex;
                         @endphp
-                        <div class="check-row">
+                        <div class="check-row {{ ($item['type'] ?? null) === 'oil' ? 'check-row-oil' : '' }}">
                             <span class="row-number">{{ str_pad($number, 2, '0', STR_PAD_LEFT) }}</span>
                             <div class="location-cell"><span class="cell-label">点検箇所</span><span class="cell-main">{{ $item['location'] }}</span></div>
-                            <div class="item-cell"><span class="cell-label">点検項目</span><span class="cell-main">{{ $item['item'] }}</span></div>
+                            @if (($item['type'] ?? null) !== 'oil')<div class="item-cell"><span class="cell-label">点検項目</span><span class="cell-main">{{ $item['item'] }}</span></div>@endif
                             <span class="method method-cell">{{ $item['method'] }}</span>
-                            @if (($item['type'] ?? null) === 'numeric')
+                            @if (($item['type'] ?? null) === 'oil')
+                                <div class="oil-editor">
+                                    {{-- 選択肢が複数ある機器だけ、補充か交換かを選べる。 --}}
+                                    <div class="result-controls" role="group" aria-label="{{ $item['location'] }}の作業の種類">
+                                        @foreach ($item['actions'] as $action)
+                                            <label>
+                                                <input class="result-radio" type="radio" name="results[{{ $item['id'] }}][action]" value="{{ $action }}" {{ (is_array($value) && ($value['action'] ?? '') === $action) || count($item['actions']) === 1 ? 'checked' : '' }}>
+                                                <span class="result-choice">{{ \App\Support\PeriodicChecklist::actionLabels()[$action] }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                    <div class="pressure-field">
+                                        <input class="pressure-input" id="value-{{ $item['id'] }}" type="number" step="any" name="results[{{ $item['id'] }}][value]" value="{{ is_array($value) ? ($value['value'] ?? '') : '' }}" placeholder="量を入力" aria-label="{{ $item['location'] }}の量">
+                                        <span class="pressure-unit">{{ $item['unit'] }}</span>
+                                    </div>
+                                </div>
+                            @elseif (($item['type'] ?? null) === 'numeric')
                                 <div class="pressure-editor">
                                     <label class="cell-label" for="value-{{ $item['id'] }}">{{ $item['item'] }}の実測値</label>
                                     <div class="pressure-field">
@@ -121,7 +137,7 @@
                 <textarea class="note-field" id="inspection-note" name="note" maxlength="1000" placeholder="気づいたこと、引き継ぎ事項など">{{ old('note', $record ? $record->note : '') }}</textarea>
             </div>
             <div class="panel-footer">
-                <div class="footer-hint">入力内容はサーバーのデータベースに保存されます。<br>※異常が発生した場合は修理依頼書を作成し設備担当者まで連絡</div>
+                <div class="footer-hint">入力内容はサーバーのデータベースに保存されます。<br>{!! nl2br(e($type['footnote'] ?? '※異常が発生した場合は修理依頼書を作成し設備担当者まで連絡')) !!}</div>
                 <div class="button-group">
                     @if ($editing)<a class="button" href="{{ route('inspections.' . $type['key'] . '.show', $record) }}">キャンセル</a>@endif
                     <button class="button button-primary" type="submit">{{ $editing ? '変更を保存' : '点検を保存' }}</button>
